@@ -1,0 +1,461 @@
+body { margin: 0; overflow: hidden; background: #050510; }
+
+#loading {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: radial-gradient(ellipse at 50% 80%, #1a1a2e 0%, #0d0d1a 40%, #050510 100%);
+  z-index: 999;
+  cursor: default;
+  transition: opacity var(--fade-out) ease-out;
+}
+#loading.fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* 성운 효과 */
+.nebula {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+.nebula::before, .nebula::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.1;
+  animation: nebulaDrift 10s ease-in-out infinite alternate;
+}
+.nebula::before {
+  width: 600px; height: 600px;
+  top: 5%; left: 5%;
+  background: radial-gradient(circle, #5a2090, transparent);
+}
+.nebula::after {
+  width: 500px; height: 500px;
+  bottom: 5%; right: 10%;
+  background: radial-gradient(circle, #1a5a7e, transparent);
+  animation-delay: -5s;
+}
+@keyframes nebulaDrift {
+  0% { transform: translate(0, 0) scale(1); opacity: 0.06; }
+  100% { transform: translate(40px, -30px) scale(1.15); opacity: 0.12; }
+}
+
+/* 오로라 효과 */
+.aurora {
+  position: fixed;
+  bottom: 0;
+  left: -10%;
+  width: 120%;
+  height: var(--aurora-height, 40%);
+  pointer-events: none;
+  opacity: var(--aurora-base-opacity, 0.07);
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(var(--aurora-color1, 0,200,150), var(--aurora-opacity1, 0.3)) 30%,
+    rgba(var(--aurora-color2, 0,100,200), var(--aurora-opacity2, 0.2)) 60%,
+    rgba(var(--aurora-color3, 80,0,180), var(--aurora-opacity3, 0.15)) 100%
+  );
+  filter: blur(var(--aurora-blur, 40px));
+  animation: auroraPulse var(--aurora-speed, 8s) ease-in-out infinite alternate;
+}
+@keyframes auroraPulse {
+  0% { transform: translateX(calc(var(--aurora-sway, 5%) * -1)) scaleY(0.8); opacity: calc(var(--aurora-base-opacity, 0.07) * 0.7); }
+  50% { opacity: calc(var(--aurora-base-opacity, 0.07) * 1.4); }
+  100% { transform: translateX(var(--aurora-sway, 5%)) scaleY(1.2); opacity: var(--aurora-base-opacity, 0.07); }
+}
+
+/* 달 */
+.moon-float {
+  animation: moonFloat var(--moon-float-speed) ease-in-out infinite;
+}
+@keyframes moonFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+.moon-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.3s ease-out;
+}
+.moon {
+  width: var(--moon-size);
+  height: var(--moon-size);
+  border-radius: 50%;
+  background: url('fullmoon.png') center/cover no-repeat;
+  position: relative;
+  z-index: 2;
+  animation: rotate var(--moon-spin-speed) linear infinite;
+}
+.moon.no-glow::after { display: none; }
+
+/* 달무리 (Halo) */
+.moon-halo {
+  position: absolute;
+  width: var(--moon-halo-size);
+  height: var(--moon-halo-size);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(var(--moon-halo-blur));
+  background: radial-gradient(
+    circle,
+    rgba(var(--moon-halo-color), 0) 30%,
+    rgba(var(--moon-halo-color), var(--moon-halo-opacity)) 50%,
+    rgba(var(--moon-halo-color), calc(var(--moon-halo-opacity) * 0.5)) 65%,
+    rgba(var(--moon-halo-color), 0) 80%
+  );
+  animation: haloPulse var(--moon-halo-pulse-speed) ease-in-out infinite alternate;
+}
+@keyframes haloPulse {
+  0% { transform: scale(0.95); opacity: 0.7; }
+  100% { transform: scale(1.05); opacity: 1; }
+}
+
+/* 달빛 광선 (God Rays) */
+.moon-rays {
+  position: absolute;
+  width: calc(var(--moon-size) * 3);
+  height: calc(var(--moon-size) * 3);
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg, rgba(245,243,206,0.15) 8deg, transparent 16deg,
+    transparent 30deg, rgba(245,243,206,0.1) 38deg, transparent 46deg,
+    transparent 72deg, rgba(245,243,206,0.12) 80deg, transparent 88deg,
+    transparent 110deg, rgba(245,243,206,0.08) 118deg, transparent 126deg,
+    transparent 155deg, rgba(245,243,206,0.14) 163deg, transparent 171deg,
+    transparent 200deg, rgba(245,243,206,0.1) 208deg, transparent 216deg,
+    transparent 245deg, rgba(245,243,206,0.11) 253deg, transparent 261deg,
+    transparent 290deg, rgba(245,243,206,0.09) 298deg, transparent 306deg,
+    transparent 340deg, rgba(245,243,206,0.13) 348deg, transparent 356deg
+  );
+  filter: blur(8px);
+  opacity: var(--moon-rays-opacity);
+  animation: raysRotate var(--moon-rays-speed) linear infinite;
+  z-index: 1;
+  pointer-events: none;
+}
+@keyframes raysRotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* 달 안개 (glow) 레이어 */
+.moon::after {
+  content: '';
+  position: absolute;
+  top: calc(-1 * var(--moon-glow-gap));
+  left: calc(-1 * var(--moon-glow-gap));
+  right: calc(-1 * var(--moon-glow-gap));
+  bottom: calc(-1 * var(--moon-glow-gap));
+  border-radius: 50%;
+  box-shadow:
+    0 0 30px var(--moon-glow-range) rgba(245, 243, 206, 0.4),
+    0 0 80px var(--moon-glow-range) rgba(245, 243, 206, 0.15),
+    0 0 120px var(--moon-glow-range) rgba(212, 160, 86, 0.1);
+  animation: moonGlow 3s ease-in-out infinite;
+  z-index: -1;
+}
+@keyframes moonGlow {
+  0%, 100% {
+    box-shadow: 0 0 30px var(--moon-glow-range) rgba(245,243,206,0.4),
+                0 0 80px var(--moon-glow-range) rgba(245,243,206,0.15),
+                0 0 120px var(--moon-glow-range) rgba(212,160,86,0.1);
+  }
+  50% {
+    box-shadow: 0 0 50px var(--moon-glow-range) rgba(245,243,206,0.6),
+                0 0 120px var(--moon-glow-range) rgba(245,243,206,0.3),
+                0 0 180px var(--moon-glow-range) rgba(212,160,86,0.15);
+  }
+}
+
+/* 달에서 퍼지는 파동 링 */
+.pulse-ring {
+  position: absolute;
+  width: var(--moon-size);
+  height: var(--moon-size);
+  border-radius: 50%;
+  border: 1px solid rgba(245, 243, 206, 0.3);
+  z-index: 3;
+  animation: pulseExpand var(--pulse-speed) ease-out infinite;
+}
+.pulse-ring:nth-child(2) { animation-delay: calc(var(--pulse-speed) / 3); }
+.pulse-ring:nth-child(3) { animation-delay: calc(var(--pulse-speed) / 3 * 2); }
+@keyframes pulseExpand {
+  0% { transform: scale(var(--pulse-start)); opacity: 0.4; }
+  100% { transform: scale(var(--pulse-scale)); opacity: 0; }
+}
+
+/* 궤도 링 */
+.orbit {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid transparent;
+}
+.orbit-1 {
+  width: var(--orbit-size-1); height: var(--orbit-size-1);
+  animation: rotate var(--orbit-speed-1) linear infinite var(--orbit-dir-1);
+}
+.orbit-2 {
+  width: var(--orbit-size-2); height: var(--orbit-size-2);
+  animation: rotate var(--orbit-speed-2) linear infinite var(--orbit-dir-2);
+}
+.orbit-3 {
+  width: var(--orbit-size-3); height: var(--orbit-size-3);
+  animation: rotate var(--orbit-speed-3) linear infinite var(--orbit-dir-3);
+}
+.orbit-4 {
+  width: var(--orbit-size-4); height: var(--orbit-size-4);
+  animation: rotate var(--orbit-speed-4) linear infinite var(--orbit-dir-4);
+}
+.orbit::before {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+}
+.orbit-1::before {
+  top: calc(-1 * var(--orbit-dot-1) / 2); left: 50%;
+  width: var(--orbit-dot-1); height: var(--orbit-dot-1);
+  background: rgba(var(--orbit-dot-color-1), var(--orbit-dot-opacity-1));
+  box-shadow: 0 0 calc(var(--orbit-glow-1) / 2) rgba(var(--orbit-dot-color-1), 0.7),
+              0 0 var(--orbit-glow-1) rgba(var(--orbit-dot-color-1), 0.3);
+}
+.orbit-2::before {
+  top: 50%; right: calc(-1 * var(--orbit-dot-2) / 2);
+  width: var(--orbit-dot-2); height: var(--orbit-dot-2);
+  background: rgba(var(--orbit-dot-color-2), var(--orbit-dot-opacity-2));
+  box-shadow: 0 0 calc(var(--orbit-glow-2) / 2) rgba(var(--orbit-dot-color-2), 0.6),
+              0 0 var(--orbit-glow-2) rgba(var(--orbit-dot-color-2), 0.3);
+}
+.orbit-3::before {
+  top: calc(-1 * var(--orbit-dot-3) / 2); left: 50%;
+  width: var(--orbit-dot-3); height: var(--orbit-dot-3);
+  background: rgba(var(--orbit-dot-color-3), var(--orbit-dot-opacity-3));
+  box-shadow: 0 0 calc(var(--orbit-glow-3) / 2) rgba(var(--orbit-dot-color-3), 0.4),
+              0 0 var(--orbit-glow-3) rgba(var(--orbit-dot-color-3), 0.2);
+}
+.orbit-4::before {
+  top: 50%; right: calc(-1 * var(--orbit-dot-4) / 2);
+  width: var(--orbit-dot-4); height: var(--orbit-dot-4);
+  background: rgba(var(--orbit-dot-color-4), var(--orbit-dot-opacity-4));
+  box-shadow: 0 0 calc(var(--orbit-glow-4) / 2) rgba(var(--orbit-dot-color-4), 0.6),
+              0 0 var(--orbit-glow-4) rgba(var(--orbit-dot-color-4), 0.3);
+}
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* 타이틀 그룹 */
+.title-group {
+  margin-top: var(--title-gap);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* 제목 */
+.title {
+  font-family: 'Segoe UI', sans-serif;
+  font-size: var(--title-size);
+  font-weight: var(--title-weight);
+  letter-spacing: var(--title-spacing);
+  background: linear-gradient(90deg, #c9a04e, #faf6d0, #d4a056, #faf6d0, #c9a04e);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: var(--title-glow);
+  opacity: 0;
+  animation: shimmer 4s linear infinite, titleReveal var(--title-fade-in) ease-out var(--title-fade-delay) forwards;
+}
+@keyframes shimmer {
+  0% { background-position: 100% 50%; }
+  100% { background-position: -100% 50%; }
+}
+@keyframes titleReveal {
+  0% { opacity: 0; transform: scaleX(var(--title-reveal-scale)); }
+  100% { opacity: 1; transform: scaleX(1); }
+}
+
+/* 로딩 바 */
+.loading-bar-container {
+  margin-top: var(--bar-gap);
+  width: var(--bar-width);
+  height: var(--bar-height);
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+  opacity: 0;
+  animation: fadeIn var(--bar-fade-in) ease-out var(--bar-fade-delay) forwards;
+  -webkit-mask-image: linear-gradient(90deg, transparent, white 15%, white 85%, transparent);
+  mask-image: linear-gradient(90deg, transparent, white 15%, white 85%, transparent);
+}
+@keyframes fadeIn {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+.loading-bar {
+  height: 100%;
+  width: 40%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, rgba(245, 243, 206, 0.9), transparent);
+  animation: loadingSlide var(--bar-slide-speed) ease-in-out infinite;
+}
+@keyframes loadingSlide {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(500%); }
+}
+/* 실제 진행률 모드 */
+.loading-bar.real-progress {
+  width: 0%;
+  animation: none;
+  background: linear-gradient(90deg, rgba(245,243,206,0.3), rgba(245,243,206,0.9), rgba(245,243,206,0.3));
+  transition: width var(--progress-speed) ease-out;
+}
+/* 퍼센테이지 표시 */
+.progress-percent {
+  margin-top: var(--stage-text-gap);
+  font-family: 'Segoe UI', sans-serif;
+  font-size: 28px;
+  font-weight: 200;
+  letter-spacing: 3px;
+  background: linear-gradient(90deg, #c9a04e, #faf6d0, #d4a056, #faf6d0, #c9a04e);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 4s linear infinite, fadeIn var(--bar-fade-in) ease-out var(--bar-fade-delay) forwards;
+  opacity: 0;
+}
+.progress-percent.no-gradient {
+  background: none;
+  -webkit-background-clip: unset;
+  -webkit-text-fill-color: unset;
+  background-clip: unset;
+  color: rgba(245, 243, 206, 0.7);
+  animation: fadeIn var(--bar-fade-in) ease-out var(--bar-fade-delay) forwards;
+}
+/* 단계 텍스트 */
+.stage-text {
+  margin-top: var(--stage-text-gap);
+  font-family: 'Segoe UI', sans-serif;
+  font-size: var(--stage-text-size);
+  letter-spacing: 2px;
+  min-height: 1.2em;
+  background: linear-gradient(90deg, #c9a04e, #faf6d0, #d4a056, #faf6d0, #c9a04e);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 4s linear infinite, fadeIn var(--bar-fade-in) ease-out var(--bar-fade-delay) forwards;
+  opacity: 0;
+}
+.stage-text.no-gradient {
+  background: none;
+  -webkit-background-clip: unset;
+  -webkit-text-fill-color: unset;
+  background-clip: unset;
+  color: rgba(245, 243, 206, var(--stage-text-opacity));
+  animation: fadeIn var(--bar-fade-in) ease-out var(--bar-fade-delay) forwards;
+}
+
+/* 별 */
+.stars {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.star {
+  position: absolute;
+  background: white;
+  border-radius: 50%;
+  animation: twinkle 3s ease-in-out infinite;
+}
+@keyframes twinkle {
+  0%, 100% { opacity: 0.1; transform: scale(1); }
+  50% { opacity: 0.9; transform: scale(1.3); }
+}
+
+/* 별자리 연결선 */
+.constellations {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.constellation line {
+  stroke: rgba(var(--constellation-line-color), var(--constellation-line-opacity));
+  stroke-width: var(--constellation-line-width);
+}
+.constellation {
+  animation: constellationPulse var(--constellation-fade-speed) ease-in-out infinite alternate;
+}
+@keyframes constellationPulse {
+  0% { opacity: 0.3; }
+  100% { opacity: 1; }
+}
+
+/* 유성 */
+.shooting-star {
+  position: fixed;
+  width: 100px;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.8), rgba(255,255,255,0.2), transparent);
+  transform: rotate(-35deg);
+  transform-origin: right center;
+  animation: shoot var(--shoot-speed) ease-out infinite;
+  opacity: 0;
+  pointer-events: none;
+}
+@keyframes shoot {
+  0% { opacity: 0; transform: rotate(-35deg) translateX(0) scaleX(0); }
+  2% { opacity: 1; transform: rotate(-35deg) translateX(0) scaleX(1); }
+  8% { opacity: 0; transform: rotate(-35deg) translateX(calc(-1 * var(--shoot-distance))) scaleX(0.6); }
+  100% { opacity: 0; }
+}
+
+/* 구름/안개 레이어 */
+.cloud {
+  position: fixed;
+  left: -30%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center,
+    rgba(200,200,220,0.6) 0%,
+    rgba(180,180,200,0.3) 30%,
+    transparent 70%
+  );
+  opacity: var(--cloud-opacity);
+  filter: blur(var(--cloud-blur));
+  pointer-events: none;
+  z-index: 4;
+  animation: cloudDrift linear infinite;
+}
+@keyframes cloudDrift {
+  0% { transform: translateX(-10%); }
+  100% { transform: translateX(calc(100vw + 60%)); }
+}
+
+/* 떠다니는 먼지 입자 */
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: particleFloat linear infinite;
+}
+@keyframes particleFloat {
+  0% { transform: translateY(0) translateX(0); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(-100vh) translateX(40px); opacity: 0; }
+}
